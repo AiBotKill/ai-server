@@ -13,8 +13,11 @@ func main() {
 		log.Panicln("Can connect or start to gnatsd:", err.Error())
 	}
 
-	sc := NewAiServer()
-	go sc.Listen(2000)
+	sockServer := NewSocketServer()
+	go sockServer.Listen(2000)
+
+	websockServer := NewWebsocketServer()
+	go websockServer.Listen(2001)
 
 	// Logging server stats until the server is stopped.
 	for {
