@@ -24,5 +24,9 @@ func LogDebug(v ...interface{}) {
 }
 
 func LogNats(v ...interface{}) {
-	_ = natsEncodedConn.Publish("log", fmt.Sprintln(v))
+	s := fmt.Sprintln(v)
+	j := map[string]string{
+		"log": s,
+	}
+	_ = natsEncodedConn.Publish("log", j)
 }

@@ -15,7 +15,7 @@ func debugGnatsd() {
 }
 
 func startNats() error {
-	c, err := nats.Connect(nats.DefaultURL)
+	c, err := nats.Connect("nats://localhost:4222")
 	if err != nil {
 		return err
 	}
