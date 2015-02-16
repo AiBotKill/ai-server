@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	gnatsd "github.com/apcera/gnatsd/server"
 	"github.com/apcera/nats"
 )
@@ -15,7 +17,16 @@ func debugGnatsd() {
 }
 
 func startNats() error {
-	c, err := nats.Connect("nats://localhost:4222")
+	addr := os.Getenv("GNATSD_PORT_4222_TCP_ADDR")
+	port := os.Getenv("GNATSD_PORT_4222_TCP_PORT")
+	url := ""
+	if addr == "" || port == "" {
+		url = "nats://localhost:4222"
+	} else {
+		url = ("nats://" + addr + ":" + port)
+	}
+
+	c, err := nats.Connect(url)
 	if err != nil {
 		return err
 	}
