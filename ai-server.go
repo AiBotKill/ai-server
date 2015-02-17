@@ -21,7 +21,7 @@ func main() {
 
 	// Logging server stats until the server is stopped.
 	for {
-		<-time.After(time.Second * 1)
+		<-time.After(time.Second * 5)
 		err := natsEncodedConn.Publish("ping", map[string]interface{}{
 			"ping":      "aiServer",
 			"serviceId": serviceId,
