@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const NATS_TIMEOUT = time.Second * 30
+const NATS_TIMEOUT = time.Second * 10
 
 type Reader interface {
 	Read() (line string, err error)
@@ -158,9 +158,26 @@ func (a *AiConn) Parser() {
 	}()
 }
 
+func NewReply(id string, err error) []byte {
+	reply := &Reply{
+		Type: "reply",
+		Id:   id,
+	}
+	if err != nil {
+		reply.Status = "error"
+		reply.Error = err.Error()
+	} else {
+		reply.Status = "ok"
+	}
+
+	b, _ := json.Marshal(&reply)
+	return b
+}
+
 func (c *AiConn) LogErr(err error) {
 	LogError(err.Error())
 	b, _ := json.Marshal(map[string]string{
+		"type":   "reply",
 		"status": "error",
 		"error":  err.Error(),
 	})
