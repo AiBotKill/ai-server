@@ -72,6 +72,10 @@ func (a *AiConn) Parser() {
 					continue
 				}
 
+				// First message is ALWAYS registerAi, so we
+				// help out a bit.
+				regMsg.Type = "registerAi"
+
 				// Request registration through NATS
 				var regReply Reply
 				err = natsEncodedConn.Request("registerAI", regMsg, &regReply, NATS_TIMEOUT)
@@ -98,7 +102,7 @@ func (a *AiConn) Parser() {
 				a.Conn.Write(string(b))
 				a.State = "registered"
 
-				natsEncodedConn.Subscribe("aiserver."+a.BotId, a.MsgHandler)
+				natsEncodedConn.Subscribe(a.BotId+".joinRequest", a.MsgHandler)
 				LogDebug("IT WORKS!")
 				continue
 			}
@@ -174,7 +178,9 @@ func (c *AiConn) MsgHandler(subj string, reply string, msg []byte) {
 		c.Conn.Write(string(msg))
 	case "joined":
 		switch GetMsgType(msg) {
-		case "gamestate":
+		case "gameStart":
+			c.Conn.Write(string(msg))
+		case "gameState":
 			c.Conn.Write(string(msg))
 		case "gameEnd":
 			c.Conn.Write(string(msg))
@@ -208,11 +214,12 @@ func NewJsonError(e string) string {
 
 type RegisterMessage struct {
 	Type    string `json:"type"`
-	TeamId  string `json:"botId"`
+	TeamId  string `json:"teamId"`
 	Version string `json:"version"`
 }
 
 type Reply struct {
+	Type   string `json:"type"`
 	Status string `json:"status"`
 	Id     string `json:"id"`
 	Error  string `json:"error,omitempty"`
@@ -229,8 +236,8 @@ type GameState struct {
 }
 
 type ActionRequest struct {
-	BotId     string `json:"botid"`
 	Type      string `json:"type"`
+	BotId     string `json:"botId"`
 	Action    string `json:"action"`
 	Direction struct {
 		X float64 `json:"x"`
