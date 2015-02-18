@@ -3,30 +3,27 @@ package main
 import "log"
 import "fmt"
 
-func LogError(v ...interface{}) {
+func LogFatal(v ...interface{}) {
+	natsConn.Publish("log.fatal", []byte(fmt.Sprintln(v...)))
 	log.Println("[ERROR]", v)
-	LogNats("[ERROR]", v)
+}
+
+func LogError(v ...interface{}) {
+	natsConn.Publish("log.error", []byte(fmt.Sprintln(v...)))
+	log.Println("[ERROR]", v)
 }
 
 func LogWarn(v ...interface{}) {
+	natsConn.Publish("log.warn", []byte(fmt.Sprintln(v...)))
 	log.Println("[WARN]", v)
-	LogNats("[WARN]", v)
 }
 
 func LogInfo(v ...interface{}) {
+	natsConn.Publish("log.info", []byte(fmt.Sprintln(v...)))
 	log.Println("[INFO]", v)
-	LogNats("[INFO]", v)
 }
 
 func LogDebug(v ...interface{}) {
+	natsConn.Publish("log.debug", []byte(fmt.Sprintln(v...)))
 	log.Println("[DEBUG]", v)
-	LogNats("[DEBUG]", v)
-}
-
-func LogNats(v ...interface{}) {
-	s := fmt.Sprintln(v)
-	j := map[string]string{
-		"log": s,
-	}
-	_ = natsEncodedConn.Publish("log", j)
 }

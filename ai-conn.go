@@ -100,34 +100,11 @@ func (a *AiConn) Parser() {
 				a.BotId = regReply.Id
 				b, _ := json.Marshal(regReply)
 				a.Conn.Write(string(b))
-				a.State = "registered"
+				a.State = "joined"
 
-				natsEncodedConn.Subscribe(a.BotId+".joinRequest", a.MsgHandler)
+				natsEncodedConn.Subscribe(a.BotId+".gameState", a.MsgHandler)
 				LogDebug("IT WORKS!")
 				continue
-			}
-
-			if a.State == "registered" {
-				var joinMsg JoinGame
-				err := json.Unmarshal([]byte(line), &joinMsg)
-				if err != nil {
-					a.LogErr(err)
-					continue
-				}
-
-				var reply Reply
-				err = natsEncodedConn.Request(joinMsg.GameId+".join", joinMsg, &reply, NATS_TIMEOUT)
-				if err != nil {
-					a.LogErr(err)
-					continue
-				}
-				if reply.Status != "ok" {
-					a.LogErr(errors.New(reply.Error))
-					continue
-				}
-
-				a.GameId = joinMsg.GameId
-				a.State = "joined"
 			}
 
 			if a.State == "joined" {
@@ -185,15 +162,6 @@ func (c *AiConn) LogErr(err error) {
 }
 
 func (c *AiConn) MsgHandler(subj string, reply string, msg []byte) {
-	switch c.State {
-	case "registered":
-		var m JoinRequest
-		err := json.Unmarshal(msg, &m)
-		if err != nil {
-			LogError("Error unmarshalling joinrequest", err.Error())
-		}
-		c.Conn.Write(string(msg))
-	case "joined":
 		switch GetMsgType(msg) {
 		case "gameStart":
 			c.Conn.Write(string(msg))
@@ -203,7 +171,6 @@ func (c *AiConn) MsgHandler(subj string, reply string, msg []byte) {
 			c.Conn.Write(string(msg))
 			c.Conn.Close()
 		}
-	}
 }
 
 func GetMsgType(b []byte) string {
