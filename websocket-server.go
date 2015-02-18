@@ -2,11 +2,12 @@ package main
 
 import (
 	"errors"
-	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -67,6 +68,7 @@ type WebsocketConn struct {
 	Conn     *websocket.Conn
 	Inbound  chan []byte
 	Outbound chan []byte
+	Closed   bool
 }
 
 func NewWebsocketConn(conn *websocket.Conn) *WebsocketConn {
@@ -74,11 +76,15 @@ func NewWebsocketConn(conn *websocket.Conn) *WebsocketConn {
 		Conn:     conn,
 		Inbound:  make(chan []byte),
 		Outbound: make(chan []byte),
+		Closed:   false,
 	}
 	return c
 }
 
 func (c *WebsocketConn) Write(line string) error {
+	if c.Closed {
+		return errors.New("Connection already closed")
+	}
 	c.Outbound <- []byte(line)
 	return nil
 }
@@ -134,6 +140,7 @@ func (c *WebsocketConn) writer() {
 	pingTicker := time.NewTicker(pingPeriod)
 	defer func() {
 		LogDebug("connection writer gorouting stopping.")
+		c.Closed = true
 		pingTicker.Stop()
 		close(c.Outbound)
 		c.Conn.Close()
