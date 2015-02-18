@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
+
+	"github.com/apcera/nats"
 )
 
 const NATS_TIMEOUT = time.Second * 10
@@ -102,8 +104,9 @@ func (a *AiConn) Parser() {
 				a.Conn.Write(string(b))
 				a.State = "joined"
 
-				natsEncodedConn.Subscribe(a.BotId+".gameState", a.MsgHandler)
-				LogDebug("IT WORKS!")
+				natsConn.Subscribe(a.BotId+".gameState", func(msg *nats.Msg) {
+					a.Conn.Write(string(msg.Data))
+				})
 				continue
 			}
 
@@ -159,18 +162,6 @@ func (c *AiConn) LogErr(err error) {
 		"error":  err.Error(),
 	})
 	c.Conn.Write(string(b))
-}
-
-func (c *AiConn) MsgHandler(subj string, reply string, msg []byte) {
-		switch GetMsgType(msg) {
-		case "gameStart":
-			c.Conn.Write(string(msg))
-		case "gameState":
-			c.Conn.Write(string(msg))
-		case "gameEnd":
-			c.Conn.Write(string(msg))
-			c.Conn.Close()
-		}
 }
 
 func GetMsgType(b []byte) string {
