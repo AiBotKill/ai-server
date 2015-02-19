@@ -117,7 +117,7 @@ func (a *AiConn) Parser() {
 
 			if a.State == "joined" {
 				var action ActionRequest
-				err := json.Unmarshal([]byte(line), action)
+				err := json.Unmarshal([]byte(line), &action)
 				if err != nil {
 					a.LogErr(err)
 					continue
