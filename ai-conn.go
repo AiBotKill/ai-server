@@ -9,7 +9,7 @@ import (
 	"github.com/apcera/nats"
 )
 
-const NATS_TIMEOUT = time.Second * 10
+const NATS_TIMEOUT = time.Second * 5
 
 type Reader interface {
 	Read() (line string, err error)
