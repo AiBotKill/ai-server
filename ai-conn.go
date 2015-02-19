@@ -62,7 +62,6 @@ func (a *AiConn) Parser() {
 				}
 				return
 			}
-			LogDebug("got string", line)
 
 			// If teamId has not been set yet, expect the first message
 			// to be register message. Keep trying until registration
@@ -87,11 +86,6 @@ func (a *AiConn) Parser() {
 					continue
 				}
 
-				// DEBUG
-				if b, err := json.Marshal(&regReply); err == nil {
-					LogDebug("Got reply!", string(b))
-				}
-
 				// Check that reply status is ok.
 				if regReply.Status != "ok" {
 					err := errors.New("Registration not ok for team " + regMsg.TeamId + ": " + regReply.Error)
@@ -112,13 +106,6 @@ func (a *AiConn) Parser() {
 					}
 					natsConn.Publish(msg.Reply, NewReply(a.BotId, err))
 				})
-
-				natsConn.Subscribe(a.BotId+".disconnect", func(msg *nats.Msg) {
-					a.Conn.Write("{\"type\":\"gameEnd\"}")
-					a.Conn.Close()
-					return
-				})
-
 				continue
 			}
 
