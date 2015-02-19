@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/apcera/nats"
@@ -115,30 +116,30 @@ func (a *AiConn) Parser() {
 			}
 
 			if a.State == "joined" {
-				if GetMsgType([]byte(line)) == "action" {
-					var action ActionRequest
-					err := json.Unmarshal([]byte(line), action)
-					if err != nil {
-						a.LogErr(err)
-						continue
-					}
-					action.Type = "action"
-					action.BotId = a.BotId
-
-					var reply Reply
-					if err := natsEncodedConn.Request(a.BotId+".action", action, &reply, NATS_TIMEOUT); err != nil {
-						a.LogErr(err)
-						continue
-					}
-
-					replBytes, err := json.Marshal(&reply)
-					if err != nil {
-						a.LogErr(err)
-						continue
-					}
-
-					a.Conn.Write(string(replBytes))
+				var action ActionRequest
+				err := json.Unmarshal([]byte(line), action)
+				if err != nil {
+					a.LogErr(err)
+					continue
 				}
+
+				log.Println("got action ok", action)
+
+				var reply Reply
+				if err := natsEncodedConn.Request(a.BotId+".action", action, &reply, NATS_TIMEOUT); err != nil {
+					a.LogErr(err)
+					continue
+				} else {
+					log.Println("sent action ok")
+				}
+
+				replBytes, err := json.Marshal(&reply)
+				if err != nil {
+					a.LogErr(err)
+					continue
+				}
+
+				a.Conn.Write(string(replBytes))
 			}
 		}
 	}()
@@ -217,9 +218,6 @@ type GameState struct {
 }
 
 type ActionRequest struct {
-	Type      string `json:"type"`
-	BotId     string `json:"botId"`
-	Action    string `json:"action"`
 	Direction struct {
 		X float64 `json:"x"`
 		Y float64 `json:"y"`
