@@ -164,12 +164,6 @@ func NewReply(id string, err error) []byte {
 
 func (c *AiConn) LogErr(err error) {
 	LogError(err.Error())
-	b, _ := json.Marshal(map[string]string{
-		"type":   "reply",
-		"status": "error",
-		"error":  err.Error(),
-	})
-	c.Conn.Write(string(b))
 }
 
 func GetMsgType(b []byte) string {
