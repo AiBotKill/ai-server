@@ -122,9 +122,11 @@ func (a *AiConn) Parser() {
 						a.LogErr(err)
 						continue
 					}
+					action.Type = "action"
+					action.BotId = a.BotId
 
 					var reply Reply
-					if err := natsEncodedConn.Request(a.GameId+".action", action, &reply, NATS_TIMEOUT); err != nil {
+					if err := natsEncodedConn.Request(a.BotId+".action", action, &reply, NATS_TIMEOUT); err != nil {
 						a.LogErr(err)
 						continue
 					}
