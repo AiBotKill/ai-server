@@ -218,7 +218,7 @@ type GameState struct {
 }
 
 type ActionRequest struct {
-	Action    string `json:"action"`
+	Type      string `json:"type"`
 	Direction struct {
 		X float64 `json:"x"`
 		Y float64 `json:"y"`
