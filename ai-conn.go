@@ -136,17 +136,11 @@ func (a *AiConn) Parser() {
 				if err := natsEncodedConn.Request(a.BotId+".action", action, &reply, NATS_TIMEOUT); err != nil {
 					a.LogErr(err)
 					continue
+				} else if reply.Status != "ok" {
+					log.Println("action status not ok!", reply.Status)
 				} else {
 					log.Println("sent action ok")
 				}
-
-				replBytes, err := json.Marshal(&reply)
-				if err != nil {
-					a.LogErr(err)
-					continue
-				}
-
-				a.Conn.Write(string(replBytes))
 			}
 		}
 	}()
