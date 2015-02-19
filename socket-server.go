@@ -79,7 +79,7 @@ func (s *SockAiConn) Write(line string) error {
 }
 
 func (s *SockAiConn) Close() error {
-	return nil
+	return s.Conn.Close()
 }
 
 // write will write []byte to AiConn.sc with lock, so we don't get corrupted messages with overlapping writes

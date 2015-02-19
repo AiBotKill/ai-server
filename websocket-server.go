@@ -98,7 +98,7 @@ func (c *WebsocketConn) Read() (string, error) {
 }
 
 func (c *WebsocketConn) Close() error {
-	return nil
+	return c.Conn.Close()
 }
 
 // reader is started as a routine, it will continue to read data from

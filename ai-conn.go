@@ -112,6 +112,13 @@ func (a *AiConn) Parser() {
 					}
 					natsConn.Publish(msg.Reply, NewReply(a.BotId, err))
 				})
+
+				natsConn.Subscribe(a.BotId+".disconnect", func(msg *nats.Msg) {
+					a.Conn.Write("{\"type\":\"gameEnd\"}")
+					a.Conn.Close()
+					return
+				})
+
 				continue
 			}
 
