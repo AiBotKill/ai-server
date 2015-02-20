@@ -100,6 +100,7 @@ func (a *AiConn) Parser() {
 				a.State = "joined"
 
 				natsConn.Subscribe(a.BotId+".gameState", func(msg *nats.Msg) {
+					log.Println(string(msg.Data))
 					err := a.Conn.Write(string(msg.Data))
 					if err != nil {
 						a.LogErr(err)
